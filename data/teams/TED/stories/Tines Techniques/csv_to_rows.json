@@ -1,0 +1,296 @@
+{
+    "schema_version": 4,
+    "standard_lib_version": 6,
+    "name": "CSV to Rows",
+    "description": null,
+    "guid": "02e202ba4ded8b16385ab266def7b7cb",
+    "slug": "csv_to_rows",
+    "exported_at": "2022-10-21T22:45:53Z",
+    "agents": [
+        {
+            "type": "Agents::WebhookAgent",
+            "name": "CSV Intake",
+            "disabled": false,
+            "guid": "4ea72de14b0eb0191b25efa09503e81f",
+            "options": {
+                "secret": "56554ceedfa82e0a1091c2d3c62a7ffe",
+                "verbs": "get,post",
+                "path": "150eb2231a8efcc4ce902a094f93d26e"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Parse CSV",
+            "disabled": false,
+            "guid": "09d1d72b04e1cbf1b8b83dc8383c9066",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "rows": "=BASE64_DECODE(receive_csv.body.contents) |> CSV_PARSE(%)"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Transform Rows",
+            "disabled": false,
+            "guid": "b47b9938cb21b8ed004d14fa5408d9f8",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "rows": "[<%for row in parse_csv.rows%><%if FORLOOP.first != TRUE%>{ <%for value in parse_csv.rows.first%>\"<<value>>\":\"<<row[FORLOOP.index0]>>\"<%if FORLOOP.last != TRUE%>,<%endif%><%endfor%> }<%if FORLOOP.last != TRUE%>,<%endif%><%endif%><%endfor%>]"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Return Rows",
+            "disabled": false,
+            "guid": "d08c41f036ba7288dec9b686824c5288",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "rows": "=transform_rows.rows"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::WebhookAgent",
+            "name": "Receive CSV",
+            "disabled": false,
+            "guid": "fad1069e132043b72f2a09ef64fc8975",
+            "options": {
+                "secret": "2ea0eadccae15725cc43f26f511808cc",
+                "verbs": "get,post",
+                "path": "b283bb63ba6066cf27b1fd296bb293e3"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::SendToStoryAgent",
+            "name": "CSV to Rows",
+            "disabled": false,
+            "guid": "f483acb05bdc16b506a9b80a7e374f62",
+            "options": {
+                "story": "<<STORY.csv_to_rows>>",
+                "payload": {
+                    "contents": "<<csv_intake.body.csv_upload.contents>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::FormAgent",
+            "name": "CSV Intake",
+            "disabled": false,
+            "guid": "2e8cdfd5a3ac350a27cb612e726c3483",
+            "options": {
+                "description": "",
+                "fields": "",
+                "submissionMessage": "Thank you for your submission",
+                "visibility": "tenant"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        }
+    ],
+    "diagram_notes": [
+        {
+            "content": "Import a CSV file via form, convert into readable and usable format",
+            "position": [
+                195.0,
+                45.0
+            ],
+            "guid": "a57bc92487ac473a496a095c1aa0e5c2",
+            "width": null
+        },
+        {
+            "content": "Send to Story to convert CSV to rows \n\u2b07\ufe0f\u2b07\ufe0f\u2b07\ufe0f",
+            "position": [
+                615.0,
+                45.0
+            ],
+            "guid": "cf9cdbc1a46340b1e3186437901f3761",
+            "width": null
+        }
+    ],
+    "links": [
+        {
+            "source": 0,
+            "receiver": 5
+        },
+        {
+            "source": 1,
+            "receiver": 2
+        },
+        {
+            "source": 2,
+            "receiver": 3
+        },
+        {
+            "source": 4,
+            "receiver": 1
+        },
+        {
+            "source": 6,
+            "receiver": 5
+        }
+    ],
+    "diagram_layout": "{\"4ea72de14b0eb0191b25efa09503e81f\":[195,150],\"09d1d72b04e1cbf1b8b83dc8383c9066\":[615,240],\"b47b9938cb21b8ed004d14fa5408d9f8\":[615,330],\"d08c41f036ba7288dec9b686824c5288\":[615,420],\"fad1069e132043b72f2a09ef64fc8975\":[615,150],\"f483acb05bdc16b506a9b80a7e374f62\":[195,240],\"2e8cdfd5a3ac350a27cb612e726c3483\":[-120,-90]}",
+    "send_to_story_enabled": true,
+    "entry_agent_guid": "fad1069e132043b72f2a09ef64fc8975",
+    "exit_agent_guids": [
+        "d08c41f036ba7288dec9b686824c5288"
+    ],
+    "exit_agent_guid": "d08c41f036ba7288dec9b686824c5288",
+    "keep_events_for": 604800,
+    "reporting_status": true,
+    "send_to_story_access": "team",
+    "send_to_stories": [],
+    "form": {
+        "name": "CSV Intake",
+        "description": "",
+        "fields": [
+            {
+                "name": "Email",
+                "description": "",
+                "required": false,
+                "type": "SHORT_TEXT",
+                "multi_select": false,
+                "options": [
+                    "Option 1",
+                    "Option 2"
+                ],
+                "ranking": -1073741824,
+                "max_characters": null,
+                "tenant_id": 6005
+            },
+            {
+                "name": " CSV Upload",
+                "description": "",
+                "required": false,
+                "type": "FILE_UPLOAD",
+                "multi_select": false,
+                "options": [
+                    "Option 1",
+                    "Option 2"
+                ],
+                "ranking": 0,
+                "max_characters": null,
+                "tenant_id": 6005
+            }
+        ],
+        "visibility": "tenant",
+        "agent_guid": "2e8cdfd5a3ac350a27cb612e726c3483",
+        "success_message": "Thank you for your submission"
+    },
+    "forms": [
+        {
+            "name": "CSV Intake",
+            "description": "",
+            "fields": [
+                {
+                    "name": "Email",
+                    "description": "",
+                    "required": false,
+                    "type": "SHORT_TEXT",
+                    "multi_select": false,
+                    "options": [
+                        "Option 1",
+                        "Option 2"
+                    ],
+                    "ranking": -1073741824,
+                    "max_characters": null,
+                    "tenant_id": 6005
+                },
+                {
+                    "name": " CSV Upload",
+                    "description": "",
+                    "required": false,
+                    "type": "FILE_UPLOAD",
+                    "multi_select": false,
+                    "options": [
+                        "Option 1",
+                        "Option 2"
+                    ],
+                    "ranking": 0,
+                    "max_characters": null,
+                    "tenant_id": 6005
+                }
+            ],
+            "visibility": "tenant",
+            "agent_guid": "2e8cdfd5a3ac350a27cb612e726c3483",
+            "success_message": "Thank you for your submission"
+        }
+    ]
+}

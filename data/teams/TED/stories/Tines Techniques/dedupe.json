@@ -1,0 +1,134 @@
+{
+    "schema_version": 4,
+    "standard_lib_version": 6,
+    "name": "Dedupe",
+    "description": null,
+    "guid": "3d25ae25956bb9d4d5e411683040710a",
+    "slug": "dedupe",
+    "exported_at": "2022-10-21T22:45:39Z",
+    "agents": [
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Example",
+            "disabled": false,
+            "guid": "4582006c180801e0a5a2cf3c142e848a",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "id": "123"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Deduplicate",
+            "disabled": false,
+            "guid": "961a73c0169a564916c24a75a713cbf0",
+            "options": {
+                "mode": "deduplicate",
+                "path": "<<example.id>><<>>",
+                "emit_duplicates": true,
+                "period": "10"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "Unique",
+            "disabled": false,
+            "guid": "1e8ec539b280cb777bce98f068d0ea8e",
+            "options": {
+                "rules": [
+                    {
+                        "type": "field==value",
+                        "value": "true",
+                        "path": "<<deduplicate.unique_event>>"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "Not Unique",
+            "disabled": false,
+            "guid": "fbef3c25be94efeec574c9aeb877764c",
+            "options": {
+                "rules": [
+                    {
+                        "type": "field==value",
+                        "value": "false",
+                        "path": "<<deduplicate.unique_event>>"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        }
+    ],
+    "diagram_notes": [],
+    "links": [
+        {
+            "source": 0,
+            "receiver": 1
+        },
+        {
+            "source": 1,
+            "receiver": 2
+        },
+        {
+            "source": 1,
+            "receiver": 3
+        }
+    ],
+    "diagram_layout": "{\"4582006c180801e0a5a2cf3c142e848a\":[225,150],\"961a73c0169a564916c24a75a713cbf0\":[225,240],\"1e8ec539b280cb777bce98f068d0ea8e\":[345,345],\"fbef3c25be94efeec574c9aeb877764c\":[135,345]}",
+    "send_to_story_enabled": false,
+    "entry_agent_guid": null,
+    "exit_agent_guids": [],
+    "exit_agent_guid": null,
+    "keep_events_for": 604800,
+    "reporting_status": true,
+    "send_to_story_access": null,
+    "send_to_stories": [],
+    "form": null,
+    "forms": []
+}

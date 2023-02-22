@@ -1,0 +1,2211 @@
+{
+    "schema_version": 4,
+    "standard_lib_version": 6,
+    "name": "Loops and Liquid",
+    "description": null,
+    "guid": "0361efcf89cb483725fffbb021f533b6",
+    "slug": "loops_and_liquid",
+    "exported_at": "2022-10-21T22:45:54Z",
+    "agents": [
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "List Example",
+            "disabled": false,
+            "guid": "210ff8e911059164d192ec35bd45c678",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Explode",
+            "disabled": false,
+            "guid": "dc289b24974ccbbb928c9660fa1f8c64",
+            "options": {
+                "mode": "explode",
+                "path": "=list_example",
+                "to": "individual_item"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Delay",
+            "disabled": false,
+            "guid": "0f5b4d79cb66a59415157a3e0d1f388f",
+            "options": {
+                "mode": "delay",
+                "seconds": "<<TIMES(explode.index, 5)>>"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Get 10 Stories",
+            "disabled": false,
+            "guid": "b2b079f53960437672bbf76510048868",
+            "options": {
+                "url": "https://<<RESOURCE.tines_domain>>/api/v1/stories?per_page=10",
+                "content_type": "json",
+                "method": "get",
+                "headers": {
+                    "x-user-email": "<<RESOURCE.tines_api_email>>",
+                    "x-user-token": "<<CREDENTIAL.tines_user_token>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Generate Page Numbers",
+            "disabled": false,
+            "guid": "56ca8aa406ea105a656f4922ebb1675c",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "pages": "=SPLIT(LOCAL.array, \",\")"
+                },
+                "local": {
+                    "array": "<%for i in RANGE(1, get_10_stories.body.meta.pages)%><<i>>,<%endfor%>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Explode Pages",
+            "disabled": false,
+            "guid": "9e5ea022608531e4d1fd6d702fbb6e3e",
+            "options": {
+                "mode": "explode",
+                "path": "=generate_page_numbers.pages",
+                "to": "page_num"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Get Page",
+            "disabled": false,
+            "guid": "7808a44214b188c535c270ec0baf6792",
+            "options": {
+                "url": "https://<<RESOURCE.tines_domain>>/api/v1/stories?per_page=10&page=<<explode_pages.page_num>>",
+                "content_type": "json",
+                "method": "get",
+                "headers": {
+                    "x-user-email": "<<RESOURCE.tines_api_email>>",
+                    "x-user-token": "<<CREDENTIAL.tines_user_token>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Where Thomas",
+            "disabled": false,
+            "guid": "b999c1134ba2d675e9b65cdbce2b5dfb",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "message": "=WHERE(array_of_objects.people, \"name\", \"thomas\")"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Where Eoin, get email",
+            "disabled": false,
+            "guid": "9720fb2e8c1e2b92807141ebe12f0e94",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "message": "<<WHERE(array_of_objects.people, \"name\", \"eoin\") |> GET(%, \"email\")>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "JSONpath Example",
+            "disabled": false,
+            "guid": "e2acc1026a5b2a918f8fa639289ba2dd",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "message": {
+                        "users": [
+                            {
+                                "id": 2,
+                                "email": "alice@tines.xyz",
+                                "created_at": "2019-07-08T14:16:11.967Z",
+                                "updated_at": "2019-10-31T21:40:52.682Z",
+                                "admin": false,
+                                "story_count": 0,
+                                "first_name": "Alice",
+                                "last_name": "Smith",
+                                "last_seen": "2019-10-31T21:40:42.000Z"
+                            },
+                            {
+                                "id": 3,
+                                "email": "joe@tines.xyz",
+                                "created_at": "2019-09-11T14:46:37.880Z",
+                                "updated_at": "2019-09-27T20:45:46.527Z",
+                                "admin": false,
+                                "story_count": 3,
+                                "first_name": "Joe",
+                                "last_name": "Bloggs",
+                                "last_seen": "2019-09-27T20:45:46.000Z"
+                            }
+                        ],
+                        "meta": {
+                            "current_page": "https://demo.tines.xyz/api/v1/admin/users?page=1&per_page=20",
+                            "previous_page": null,
+                            "next_page": null,
+                            "per_page": 20,
+                            "pages": 1,
+                            "count": 2
+                        }
+                    }
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "$.message.users[*].email",
+            "disabled": false,
+            "guid": "2db16d49bda19e74d2eef9fdf371e3d6",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "message": "=JSONPATH(jsonpath_example, \"$.message.users[*].email\")"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "*.email",
+            "disabled": false,
+            "guid": "39a246516968f7e994849d30a1866044",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "message": "=JSONPATH(jsonpath_example, \"*.email\")"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Array of Objects",
+            "disabled": false,
+            "guid": "f5ba70d8a7e1e48b8d6d6e78e39b6c57",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "people": [
+                        {
+                            "name": "thomas",
+                            "email": "thomas@tines.io"
+                        },
+                        {
+                            "name": "thomas",
+                            "email": "twang@tines.io"
+                        },
+                        {
+                            "name": "eoin",
+                            "email": "eoin@tines.io"
+                        }
+                    ]
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Array of Objects",
+            "disabled": false,
+            "guid": "f041c2aff4a59050052afb367704b82e",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "people": [
+                        {
+                            "name": "thomas",
+                            "email": "thomas@tines.io"
+                        },
+                        {
+                            "name": "thomas",
+                            "email": "twang@tines.io"
+                        },
+                        {
+                            "name": "eoin",
+                            "email": "eoin@tines.io"
+                        }
+                    ]
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Map",
+            "disabled": false,
+            "guid": "ae4adb4378e59fa062e77074b24930fa",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "results": "=MAP(array_of_objects.people, \"email\")"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Get Search Status",
+            "disabled": false,
+            "guid": "f46374bf3502d53b007cb0073c7bedc3",
+            "options": {
+                "url": "https://<<RESOURCE.splunk_domain>>:8089/services/search/jobs/<<search_splunk.body.sid>>?output_mode=json",
+                "content_type": "json",
+                "method": "get",
+                "disable_ssl_verification": "true",
+                "log_error_on_status": []
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "Search Still in Progress",
+            "disabled": false,
+            "guid": "0f689bdee7511f2b0e0f8060f85701ba",
+            "options": {
+                "rules": [
+                    {
+                        "type": "regex",
+                        "value": "RUNNING|FINALIZING|PARSING",
+                        "path": "<<get_search_status.body.entry[0].content.dispatchState>>"
+                    },
+                    {
+                        "type": "field<value",
+                        "value": "5",
+                        "path": "<<set_counter.count>>"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Delay Event",
+            "disabled": false,
+            "guid": "15db03ce829464a04fc4cad2180ef464",
+            "options": {
+                "mode": "delay",
+                "seconds": "10"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "Trigger if Done",
+            "disabled": false,
+            "guid": "f641b040e1bc8a1f7a81404f0d244af9",
+            "options": {
+                "rules": [
+                    {
+                        "type": "regex",
+                        "value": "DONE",
+                        "path": "<<get_search_status.body.entry[0].content.dispatchState>>"
+                    },
+                    {
+                        "type": "field>=value",
+                        "value": "6",
+                        "path": "<<set_counter.count>>"
+                    }
+                ],
+                "must_match": "1"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Get Splunk Results",
+            "disabled": false,
+            "guid": "4f11931ee94344d5b1c61324459ae514",
+            "options": {
+                "url": "https://<<RESOURCE.splunk_domain>>:8089/services/search/jobs/<<search_splunk.body.sid>>/results?output_mode=json&count=1000",
+                "content_type": "json",
+                "method": "get",
+                "disable_ssl_verification": "true",
+                "log_error_on_status": []
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Search Splunk",
+            "disabled": false,
+            "guid": "730ef06a575e1c4a99bfec7a2ca0e337",
+            "options": {
+                "url": "https://<<RESOURCE.splunk_domain>>:8089/services/search/jobs",
+                "content_type": "form",
+                "method": "post",
+                "payload": {
+                    "search": "<<webhook_agent.search>>",
+                    "output_mode": "json"
+                },
+                "headers": {
+                    "Authorization": "Basic <<CREDENTIAL.tinesio_splunk>>"
+                },
+                "disable_ssl_verification": "true",
+                "log_error_on_status": []
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": []
+        },
+        {
+            "type": "Agents::WebhookAgent",
+            "name": "Webhook Agent",
+            "disabled": false,
+            "guid": "40bb0d1d97fa0715a93275398b51e04f",
+            "options": {
+                "secret": "0336c457a3a5cd0211091830c26ff304",
+                "verbs": "get,post",
+                "include_headers": "false",
+                "path": "b8beccbdc568613fe39e002e7dcfc19d"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Return Results",
+            "disabled": false,
+            "guid": "b1f156de1e31da2e0b8d95cc06f2129e",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "results": "=get_splunk_results.body.results"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "set counter",
+            "disabled": false,
+            "guid": "2cbc8da58d602f3724f967bf4605eeaf",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "count": "<<PLUS(set_counter.count, 1)>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Get Date and Timestamp Examples",
+            "disabled": false,
+            "guid": "1ddea245a1f970f6fd93fb571166c86e",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "epoch": "<<DATE(\"now\", \"%s\")>>",
+                    "milliseconds_since_1979": "<<DATE(\"now\", \"%s\") |> TIMES(%, 1000)>>",
+                    "YYYYMMDD": "<<DATE(\"now\", \"%Y-%m-%d\")>>",
+                    "YYYYMMDDhhmmssz": "<<DATE(\"now\", \"%Y-%m-%dT%l:%M:%S%z\")>>",
+                    "day_month_date": "<<DATE(\"now\", \"%A, %b %d\")>>",
+                    "24_hours_ago": "<<DATE(\"now\", \"%s\") |> MINUS(%, 86400) |> DATE(%, \"%Y-%m-%dT%l:%M:%S%z\")>>",
+                    "7_days_ago": "<<DATE(\"now\", \"%s\") |> MINUS(%, 604800) |> DATE(%, \"%Y-%m-%d\")>>",
+                    "further_examples": "check out https://www.foragoodstrftime.com/#reference"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Timezone",
+            "disabled": false,
+            "guid": "88c01c4ce012f7341fdb3df25519a8a5",
+            "options": {
+                "mode": "message_only",
+                "PST": "<<DATE(\"now\", \"%s\") |> MINUS(%, 28800) |> DATE(%, \"%Y-%m-%dT%H:%M:%S\")>>",
+                "EST": "<<DATE(\"now\", \"%s\") |> MINUS(%, 18000) |> DATE(%, \"%Y-%m-%dT%H:%M:%S\")>>",
+                "PST_24_hours_ago": "<<DATE(\"now\", \"%s\") |> MINUS(%, 28800) |> MINUS(%, 86400) |> DATE(%, \"%Y-%m-%dT%H:%M:%S\")>>",
+                "EST_24_hours_ago": "<<DATE(\"now\", \"%s\") |> MINUS(%, 18000) |> MINUS(%, 86400) |> DATE(%, \"%Y-%m-%dT%H:%M:%S\")>>"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Start",
+            "disabled": false,
+            "guid": "853b6195a2405a71d9f0c61b9ea79efc",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "message": "This is an automatically generated message from Tines"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Delay",
+            "disabled": false,
+            "guid": "caf32a7b9584699153b352d25c4500bf",
+            "options": {
+                "mode": "delay",
+                "seconds": 1
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Delay",
+            "disabled": false,
+            "guid": "0538d67bed0f496acfc70d35efeb47be",
+            "options": {
+                "mode": "delay",
+                "seconds": 3
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Delay",
+            "disabled": false,
+            "guid": "18267d2036509f175b707b9da4d29775",
+            "options": {
+                "mode": "delay",
+                "seconds": 5
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Implode",
+            "disabled": false,
+            "guid": "fe6e903540daa1e7320d42ec1d3ef577",
+            "options": {
+                "mode": "implode",
+                "guid_path": "=STORY_RUN_GUID()",
+                "size_path": "3"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Build Results",
+            "disabled": false,
+            "guid": "b62f80d17755d6b7326c0a0c446e2725",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "message": "This is an automatically generated message from Tines"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Build Results",
+            "disabled": false,
+            "guid": "fd69ac8fbfee87edf77348683ec77e56",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "message": "This is an automatically generated message from Tines"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Build Results",
+            "disabled": false,
+            "guid": "3641fc565b5012f6f4c73a9275bb9f23",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "message": "This is an automatically generated message from Tines"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Explode IPs",
+            "disabled": false,
+            "guid": "8358738b34893ed1844ca800455a24b0",
+            "options": {
+                "mode": "explode",
+                "path": "=extract_ip_addresses.ips",
+                "to": "ip"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Search IP in VT",
+            "disabled": false,
+            "guid": "ca6fc617b8e4fa37726172e6bfb4c6f9",
+            "options": {
+                "url": "https://www.virustotal.com/api/v3/ip_addresses/<<explode_ips.ip>>",
+                "method": "get",
+                "payload": {},
+                "headers": {
+                    "x-apikey": "<<CREDENTIAL.virustotal>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Implode",
+            "disabled": false,
+            "guid": "86899b227db87ab8c6b455cc47b04abb",
+            "options": {
+                "mode": "implode",
+                "guid_path": "=explode_ips.guid",
+                "size_path": "=LIQUID_SIZE(explode_ips, \"dot_notation\")"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EmailAgent",
+            "name": "Email Action",
+            "disabled": false,
+            "guid": "a8f58cc777bc45378408179f5565d7ef",
+            "options": {
+                "recipients": [
+                    "twang@tines.io"
+                ],
+                "subject": "Analyzed IPs",
+                "body": "<%for item in implode%>IP Address: <<item.explode_ips.ip>><br>VirusTotal Score: <<item.search_ip_in_vt.body.data.attributes.last_analysis_stats.malicious>><br><br><%endfor%>"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Extract IP Addresses",
+            "disabled": false,
+            "guid": "a1634bda0988ba039ca45dda008d0a5f",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "ips": [
+                        "79.120.175.134",
+                        "43.154.147.35",
+                        "190.94.247.218"
+                    ]
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Search for IP Address in VirusTotal",
+            "disabled": false,
+            "guid": "159c6ed39d5ce8eeff4ddc9059276dd5",
+            "options": {
+                "url": "https://www.virustotal.com/api/v3/ip_addresses/43.154.147.35",
+                "method": "get",
+                "payload": {},
+                "headers": {
+                    "x-apikey": "<<CREDENTIAL.virustotal>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Loop through Object",
+            "disabled": false,
+            "guid": "a37e444920a37b38c9660df203395a6e",
+            "options": {
+                "mode": "message_only",
+                "loop": "=search_for_ip_address_in_virustotal.body.data.attributes.last_analysis_results",
+                "payload": {
+                    "key": "<<LOOP.key>>",
+                    "value": "=LOOP.value"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EmailAgent",
+            "name": "Email Action",
+            "disabled": false,
+            "guid": "b870594b935918bd631a0e4b9f3ec9d2",
+            "options": {
+                "recipients": [
+                    "<your_email>"
+                ],
+                "subject": "IP Analysis",
+                "body": "<%for item in loop_through_object%>Source: <<item.key>><br> Result: <<item.value.result>><br><br><%endfor%>"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Get 10 Stories",
+            "disabled": false,
+            "guid": "caf41a5388672966d9618cf53c780a19",
+            "options": {
+                "url": "<<pagination_url.url>>",
+                "content_type": "json",
+                "method": "get",
+                "headers": {
+                    "x-user-email": "<<RESOURCE.tines_api_email>>",
+                    "x-user-token": "<<CREDENTIAL.tines_user_token>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Pagination URL",
+            "disabled": false,
+            "guid": "7513316dc4acf8867c21e9256ee8b60c",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "url": "https://<<RESOURCE.tines_domain>>/api/v1/stories?per_page=10"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Pagination URL",
+            "disabled": false,
+            "guid": "3276eb5b841291a7c573c8f3918c9799",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "url": "<<get_10_stories.body.meta.next_page>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "Has More Pages",
+            "disabled": false,
+            "guid": "d1de56dfc9cd953a8cd44fbe9fc63b64",
+            "options": {
+                "rules": [
+                    {
+                        "type": "!regex",
+                        "path": "<<get_10_stories.body.meta.next_page>>",
+                        "value": "^$"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Do Something For Each Page Here",
+            "disabled": false,
+            "guid": "47548e0c4d84d6800ca08c7f7dd558b1",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "message": "This is an automatically generated message from Tines"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Set Counter",
+            "disabled": false,
+            "guid": "6aec961186083a655abaf14a9df95324",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "count": "<<PLUS(set_counter.count, 1)>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Start Here",
+            "disabled": false,
+            "guid": "2cb060ffb5b8831a3b2cf72cda7e1cc6",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "message": "This is an automatically generated message from Tines"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "While count is less than or equal to 10",
+            "disabled": false,
+            "guid": "00ba28bea93b9c5a9d340dced971cfd9",
+            "options": {
+                "rules": [
+                    {
+                        "type": "field<=value",
+                        "value": "10",
+                        "path": "<<set_counter.count>>"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Delay",
+            "disabled": false,
+            "guid": "65e4a7bb0a35bb6bb17f5ddc772b7935",
+            "options": {
+                "mode": "delay",
+                "seconds": 1
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "Count is greater than 10",
+            "disabled": false,
+            "guid": "0a85219d82342c78cd6d28e57ac6dcec",
+            "options": {
+                "rules": [
+                    {
+                        "type": "field>value",
+                        "value": "10",
+                        "path": "<<set_counter.count>>"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Do something for each iteration here",
+            "disabled": false,
+            "guid": "deb6026390858d5174f10c4c256735b8",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "message": "This is an automatically generated message from Tines"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Break out of Loop",
+            "disabled": false,
+            "guid": "114734c82695def0eb14fbf938682a37",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "message": "This is an automatically generated message from Tines"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Explode IPs",
+            "disabled": false,
+            "guid": "016d2d5904b35b3b144a073df1b7679a",
+            "options": {
+                "mode": "explode",
+                "path": "=extract_ip_addresses.ips",
+                "to": "ip"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Search IP in VT",
+            "disabled": false,
+            "guid": "afed584f2c52fc75212a84703ce8e53b",
+            "options": {
+                "url": "https://www.virustotal.com/api/v3/ip_addresses/<<explode_ips.ip>>",
+                "method": "get",
+                "payload": {},
+                "headers": {
+                    "x-apikey": "<<CREDENTIAL.virustotal>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Extract IP Addresses",
+            "disabled": false,
+            "guid": "3a64dc90b9f0f1b586f60db51487ff63",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "ips": [
+                        "79.120.175.134",
+                        "43.154.147.35",
+                        "190.94.247.218"
+                    ]
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Create Temp Array",
+            "disabled": false,
+            "guid": "13e7ec4650bdc0adb55ba5ee110776c4",
+            "options": {
+                "url": "https://<<RESOURCE.tines_domain>>/api/v1/global_resources",
+                "content_type": "json",
+                "method": "post",
+                "payload": {
+                    "name": "<<STORY_RUN_GUID()>>",
+                    "value_type": "array",
+                    "value": []
+                },
+                "headers": {
+                    "x-user-email": "<<RESOURCE.tines_api_email>>",
+                    "x-user-token": "<<CREDENTIAL.tines_user_token>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Append to Array",
+            "disabled": false,
+            "guid": "ef6b11b8426ff6eb0c06835453ef7adf",
+            "options": {
+                "url": "https://<<RESOURCE.tines_domain>>/api/v1/global_resources/<<create_temp_array.body.id>>/append",
+                "content_type": "json",
+                "method": "post",
+                "payload": {
+                    "value": [
+                        {
+                            "ip": "<<explode_ips.ip>>",
+                            "vt_last_analysis_stats": "=search_ip_in_vt.body.data.attributes.last_analysis_stats"
+                        }
+                    ]
+                },
+                "headers": {
+                    "x-user-email": "<<RESOURCE.tines_api_email>>",
+                    "x-user-token": "<<CREDENTIAL.tines_user_token>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "Processed All Events",
+            "disabled": false,
+            "guid": "cfd49b5381fd6ddbd9bbffac621324b2",
+            "options": {
+                "rules": [
+                    {
+                        "type": "field>=value",
+                        "value": "<<LIQUID_SIZE(explode_ips, \"dot_notation\")>>",
+                        "path": "<<LIQUID_SIZE(append_to_array.body, \"dot_notation\")>>"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Delete Temp Array",
+            "disabled": false,
+            "guid": "34304892d79d391f486975ec94d069a1",
+            "options": {
+                "url": "https://<<RESOURCE.tines_domain>>/api/v1/global_resources/<<create_temp_array.body.id>>",
+                "content_type": "json",
+                "method": "delete",
+                "payload": {},
+                "headers": {
+                    "x-user-email": "<<RESOURCE.tines_api_email>>",
+                    "x-user-token": "<<CREDENTIAL.tines_user_token>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Get Final Result",
+            "disabled": false,
+            "guid": "1ec4c1e11b461eb526e8d7dd81b4e556",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": "=append_to_array.body"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Get 5 Stories",
+            "disabled": false,
+            "guid": "01cefb86e1460acee54b7892387e597f",
+            "options": {
+                "url": "https://<<META.tenant.domain>>/api/v1/stories?per_page=5",
+                "content_type": "json",
+                "method": "get",
+                "headers": {
+                    "x-user-email": "<<RESOURCE.tines_api_email>>",
+                    "x-user-token": "<<CREDENTIAL.tines_user_token>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "Has More Pages",
+            "disabled": false,
+            "guid": "66891b1a6d55fe1457058dd34c3b556f",
+            "options": {
+                "rules": [
+                    {
+                        "type": "!regex",
+                        "path": "<<get_5_stories.body.meta.next_page>>",
+                        "value": "^$"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Explode Stories",
+            "disabled": false,
+            "guid": "0743f456149a1ec46319279bc3eb1fcb",
+            "options": {
+                "mode": "explode",
+                "path": "=get_5_stories.body.stories",
+                "to": "story"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Get 5 Stories",
+            "disabled": false,
+            "guid": "c14aee8fab827cceccfee0b3d03766c2",
+            "options": {
+                "url": "<<get_5_stories.body.meta.next_page>>",
+                "content_type": "json",
+                "method": "get",
+                "headers": {
+                    "x-user-email": "<<RESOURCE.tines_api_email>>",
+                    "x-user-token": "<<CREDENTIAL.tines_user_token>>"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Sample Message",
+            "disabled": false,
+            "guid": "0100d8b39d0da11474ae12b9196ca33e",
+            "options": {
+                "mode": "message_only",
+                "payload": {
+                    "message": "Hello my name is Thomas"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Get values between strings",
+            "disabled": false,
+            "guid": "5f1bf471fd0f2b86f5316a48af7e2495",
+            "options": {
+                "mode": "extract",
+                "matchers": [
+                    {
+                        "path": "=sample_message.message",
+                        "regexp": "(?<=Hello )(.*)(?= Thomas)",
+                        "to": "output"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "IP Addresses",
+            "disabled": false,
+            "guid": "55d1a9f5bdfe96aeda7b7d60d761da99",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "example": "20.70.21.205 103.73.74.219 181.10.133.13"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Extract IP Addresses Using Regex",
+            "disabled": false,
+            "guid": "e7f1c0cdd884973b8ca24172d5dd624b",
+            "options": {
+                "mode": "extract",
+                "matchers": [
+                    {
+                        "path": "=ip_addresses.example",
+                        "regexp": "\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b",
+                        "to": "ips"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Extract Domain from URL",
+            "disabled": false,
+            "guid": "bb791fd51d93a04796b3eee9e7f1e5cb",
+            "options": {
+                "mode": "extract",
+                "matchers": [
+                    {
+                        "path": "=url.example",
+                        "regexp": "^(?:https?:\\/\\/)?(?:[^@\\n]+@)?(?:www\\.)?([^:\\/\\n?]+)",
+                        "to": "domain"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "URL",
+            "disabled": false,
+            "guid": "ca1c880762eb913aaf5154e1c2d36986",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "example": "https://www.tines.com"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        }
+    ],
+    "diagram_notes": [
+        {
+            "content": "Explode & Throttle",
+            "position": [
+                -240.0,
+                -60.0
+            ],
+            "guid": "6acaeddf9e7125652654df016d3c5f8d",
+            "width": null
+        },
+        {
+            "content": "Pagination via next page token",
+            "position": [
+                300.0,
+                435.0
+            ],
+            "guid": "fe3818b2cd9276df8cb20da502f65085",
+            "width": null
+        },
+        {
+            "content": "Pagination via page number",
+            "position": [
+                1200.0,
+                435.0
+            ],
+            "guid": "7c9da9b805b03a7458d03bc77383337c",
+            "width": null
+        },
+        {
+            "content": "Where",
+            "position": [
+                105.0,
+                -60.0
+            ],
+            "guid": "0b7f5bfe18675e0551b8601cd16279e7",
+            "width": null
+        },
+        {
+            "content": "Map",
+            "position": [
+                615.0,
+                -60.0
+            ],
+            "guid": "7e6e5e74a91439a9d96abfaa4ea07f95",
+            "width": null
+        },
+        {
+            "content": "JSONpath",
+            "position": [
+                960.0,
+                -60.0
+            ],
+            "guid": "fcbaf01474a20440d5b3479065645674",
+            "width": null
+        },
+        {
+            "content": "Loop & Delay",
+            "position": [
+                1650.0,
+                435.0
+            ],
+            "guid": "6d0cf68da724f9ae958eb1d7eb009988",
+            "width": null
+        },
+        {
+            "content": "Time Formats",
+            "position": [
+                1466.0,
+                -64.0
+            ],
+            "guid": "5d7f17bb3aaa4074b33745b933a1f936",
+            "width": null
+        },
+        {
+            "content": "Implode on Branches/GUID",
+            "position": [
+                240.0,
+                1260.0
+            ],
+            "guid": "53ffb3fdac7a158db2ba8ac140c579a5",
+            "width": null
+        },
+        {
+            "content": "Explode / Implode",
+            "position": [
+                -255.0,
+                1260.0
+            ],
+            "guid": "28aded7f720032df5ff6b6f2f0d0b7a9",
+            "width": null
+        },
+        {
+            "content": "LOOP through object",
+            "position": [
+                1020.0,
+                1245.0
+            ],
+            "guid": "66cc0bc7ae5d41d6c19671cf69512c31",
+            "width": null
+        },
+        {
+            "content": "General loop 10x",
+            "position": [
+                -240.0,
+                435.0
+            ],
+            "guid": "f9de4fb29e6080b8cf6b3b6d48259354",
+            "width": null
+        },
+        {
+            "content": "Explode / Temp Array",
+            "position": [
+                -600.0,
+                1260.0
+            ],
+            "guid": "ab316c94c9d0f7528b3aa7803d4c61cc",
+            "width": null
+        },
+        {
+            "content": "Regex",
+            "position": [
+                1875.0,
+                -60.0
+            ],
+            "guid": "dcc0c5bb613864ac357d8fbc6056cbb1",
+            "width": null
+        }
+    ],
+    "links": [
+        {
+            "source": 0,
+            "receiver": 1
+        },
+        {
+            "source": 1,
+            "receiver": 2
+        },
+        {
+            "source": 3,
+            "receiver": 4
+        },
+        {
+            "source": 4,
+            "receiver": 5
+        },
+        {
+            "source": 5,
+            "receiver": 6
+        },
+        {
+            "source": 9,
+            "receiver": 10
+        },
+        {
+            "source": 9,
+            "receiver": 11
+        },
+        {
+            "source": 12,
+            "receiver": 14
+        },
+        {
+            "source": 13,
+            "receiver": 8
+        },
+        {
+            "source": 13,
+            "receiver": 7
+        },
+        {
+            "source": 15,
+            "receiver": 23
+        },
+        {
+            "source": 16,
+            "receiver": 17
+        },
+        {
+            "source": 17,
+            "receiver": 15
+        },
+        {
+            "source": 18,
+            "receiver": 19
+        },
+        {
+            "source": 19,
+            "receiver": 22
+        },
+        {
+            "source": 20,
+            "receiver": 15
+        },
+        {
+            "source": 21,
+            "receiver": 20
+        },
+        {
+            "source": 23,
+            "receiver": 16
+        },
+        {
+            "source": 23,
+            "receiver": 18
+        },
+        {
+            "source": 26,
+            "receiver": 27
+        },
+        {
+            "source": 26,
+            "receiver": 28
+        },
+        {
+            "source": 26,
+            "receiver": 29
+        },
+        {
+            "source": 27,
+            "receiver": 31
+        },
+        {
+            "source": 28,
+            "receiver": 32
+        },
+        {
+            "source": 29,
+            "receiver": 33
+        },
+        {
+            "source": 31,
+            "receiver": 30
+        },
+        {
+            "source": 32,
+            "receiver": 30
+        },
+        {
+            "source": 33,
+            "receiver": 30
+        },
+        {
+            "source": 34,
+            "receiver": 35
+        },
+        {
+            "source": 35,
+            "receiver": 36
+        },
+        {
+            "source": 38,
+            "receiver": 34
+        },
+        {
+            "source": 39,
+            "receiver": 40
+        },
+        {
+            "source": 40,
+            "receiver": 41
+        },
+        {
+            "source": 42,
+            "receiver": 45
+        },
+        {
+            "source": 42,
+            "receiver": 46
+        },
+        {
+            "source": 43,
+            "receiver": 42
+        },
+        {
+            "source": 44,
+            "receiver": 42
+        },
+        {
+            "source": 45,
+            "receiver": 44
+        },
+        {
+            "source": 47,
+            "receiver": 51
+        },
+        {
+            "source": 47,
+            "receiver": 49
+        },
+        {
+            "source": 48,
+            "receiver": 47
+        },
+        {
+            "source": 49,
+            "receiver": 50
+        },
+        {
+            "source": 50,
+            "receiver": 52
+        },
+        {
+            "source": 50,
+            "receiver": 47
+        },
+        {
+            "source": 51,
+            "receiver": 53
+        },
+        {
+            "source": 54,
+            "receiver": 55
+        },
+        {
+            "source": 55,
+            "receiver": 58
+        },
+        {
+            "source": 56,
+            "receiver": 57
+        },
+        {
+            "source": 57,
+            "receiver": 54
+        },
+        {
+            "source": 58,
+            "receiver": 59
+        },
+        {
+            "source": 59,
+            "receiver": 61
+        },
+        {
+            "source": 59,
+            "receiver": 60
+        },
+        {
+            "source": 62,
+            "receiver": 63
+        },
+        {
+            "source": 62,
+            "receiver": 64
+        },
+        {
+            "source": 63,
+            "receiver": 65
+        },
+        {
+            "source": 65,
+            "receiver": 64
+        },
+        {
+            "source": 65,
+            "receiver": 63
+        },
+        {
+            "source": 66,
+            "receiver": 67
+        },
+        {
+            "source": 68,
+            "receiver": 69
+        },
+        {
+            "source": 71,
+            "receiver": 70
+        }
+    ],
+    "diagram_layout": "{\"210ff8e911059164d192ec35bd45c678\":[-240,45],\"dc289b24974ccbbb928c9660fa1f8c64\":[-240,150],\"0f5b4d79cb66a59415157a3e0d1f388f\":[-240,255],\"b2b079f53960437672bbf76510048868\":[1200,540],\"56ca8aa406ea105a656f4922ebb1675c\":[1200,630],\"9e5ea022608531e4d1fd6d702fbb6e3e\":[1200,735],\"7808a44214b188c535c270ec0baf6792\":[1200,825],\"b999c1134ba2d675e9b65cdbce2b5dfb\":[105,150],\"9720fb2e8c1e2b92807141ebe12f0e94\":[315,150],\"e2acc1026a5b2a918f8fa639289ba2dd\":[960,15],\"2db16d49bda19e74d2eef9fdf371e3d6\":[960,120],\"39a246516968f7e994849d30a1866044\":[1200,120],\"f5ba70d8a7e1e48b8d6d6e78e39b6c57\":[615,15],\"f041c2aff4a59050052afb367704b82e\":[105,30],\"ae4adb4378e59fa062e77074b24930fa\":[615,120],\"f46374bf3502d53b007cb0073c7bedc3\":[1650,720],\"0f689bdee7511f2b0e0f8060f85701ba\":[1650,900],\"15db03ce829464a04fc4cad2180ef464\":[1650,1020],\"f641b040e1bc8a1f7a81404f0d244af9\":[1875,900],\"4f11931ee94344d5b1c61324459ae514\":[1875,1020],\"730ef06a575e1c4a99bfec7a2ca0e337\":[1650,630],\"40bb0d1d97fa0715a93275398b51e04f\":[1650,540],\"b1f156de1e31da2e0b8d95cc06f2129e\":[1875,1110],\"2cbc8da58d602f3724f967bf4605eeaf\":[1650,795],\"1ddea245a1f970f6fd93fb571166c86e\":[1470,15],\"88c01c4ce012f7341fdb3df25519a8a5\":[1470,105],\"853b6195a2405a71d9f0c61b9ea79efc\":[450,1395],\"caf32a7b9584699153b352d25c4500bf\":[240,1515],\"0538d67bed0f496acfc70d35efeb47be\":[480,1515],\"18267d2036509f175b707b9da4d29775\":[705,1515],\"fe6e903540daa1e7320d42ec1d3ef577\":[465,1740],\"b62f80d17755d6b7326c0a0c446e2725\":[240,1605],\"fd69ac8fbfee87edf77348683ec77e56\":[480,1605],\"3641fc565b5012f6f4c73a9275bb9f23\":[705,1605],\"8358738b34893ed1844ca800455a24b0\":[-255,1455],\"ca6fc617b8e4fa37726172e6bfb4c6f9\":[-255,1530],\"86899b227db87ab8c6b455cc47b04abb\":[-255,1605],\"a8f58cc777bc45378408179f5565d7ef\":[-240,1965],\"a1634bda0988ba039ca45dda008d0a5f\":[-255,1380],\"159c6ed39d5ce8eeff4ddc9059276dd5\":[1020,1350],\"a37e444920a37b38c9660df203395a6e\":[1020,1455],\"b870594b935918bd631a0e4b9f3ec9d2\":[1020,1560],\"caf41a5388672966d9618cf53c780a19\":[675,645],\"7513316dc4acf8867c21e9256ee8b60c\":[675,540],\"3276eb5b841291a7c573c8f3918c9799\":[675,855],\"d1de56dfc9cd953a8cd44fbe9fc63b64\":[675,750],\"47548e0c4d84d6800ca08c7f7dd558b1\":[885,750],\"6aec961186083a655abaf14a9df95324\":[-240,630],\"2cb060ffb5b8831a3b2cf72cda7e1cc6\":[-240,540],\"00ba28bea93b9c5a9d340dced971cfd9\":[-240,720],\"65e4a7bb0a35bb6bb17f5ddc772b7935\":[-240,810],\"0a85219d82342c78cd6d28e57ac6dcec\":[15,720],\"deb6026390858d5174f10c4c256735b8\":[-240,915],\"114734c82695def0eb14fbf938682a37\":[15,810],\"016d2d5904b35b3b144a073df1b7679a\":[-600,1530],\"afed584f2c52fc75212a84703ce8e53b\":[-600,1605],\"3a64dc90b9f0f1b586f60db51487ff63\":[-600,1380],\"13e7ec4650bdc0adb55ba5ee110776c4\":[-600,1455],\"ef6b11b8426ff6eb0c06835453ef7adf\":[-600,1680],\"cfd49b5381fd6ddbd9bbffac621324b2\":[-600,1755],\"34304892d79d391f486975ec94d069a1\":[-825,1845],\"1ec4c1e11b461eb526e8d7dd81b4e556\":[-600,1845],\"01cefb86e1460acee54b7892387e597f\":[300,540],\"66891b1a6d55fe1457058dd34c3b556f\":[375,645],\"0743f456149a1ec46319279bc3eb1fcb\":[300,870],\"c14aee8fab827cceccfee0b3d03766c2\":[375,750],\"0100d8b39d0da11474ae12b9196ca33e\":[1875,15],\"5f1bf471fd0f2b86f5316a48af7e2495\":[1875,105],\"55d1a9f5bdfe96aeda7b7d60d761da99\":[2175,15],\"e7f1c0cdd884973b8ca24172d5dd624b\":[2175,105],\"bb791fd51d93a04796b3eee9e7f1e5cb\":[2445,105],\"ca1c880762eb913aaf5154e1c2d36986\":[2445,15]}",
+    "send_to_story_enabled": false,
+    "entry_agent_guid": null,
+    "exit_agent_guids": [],
+    "exit_agent_guid": null,
+    "keep_events_for": 604800,
+    "reporting_status": true,
+    "send_to_story_access": null,
+    "send_to_stories": [],
+    "form": null,
+    "forms": []
+}

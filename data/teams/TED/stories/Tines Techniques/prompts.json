@@ -1,0 +1,383 @@
+{
+    "schema_version": 4,
+    "standard_lib_version": 6,
+    "name": "Prompts",
+    "description": null,
+    "guid": "22919e4da86ed6960351cbba908565a3",
+    "slug": "prompts",
+    "exported_at": "2022-10-21T22:45:54Z",
+    "agents": [
+        {
+            "type": "Agents::EmailAgent",
+            "name": "Email Action",
+            "disabled": false,
+            "guid": "071d2e71f337f83286636b5dc0bd2855",
+            "options": {
+                "recipients": [
+                    "<your_email_here>"
+                ],
+                "subject": "Here's a prompt",
+                "body": "Press a button: <a href=\"<<PROMPT(\"Yes\")>>\">Yes</a> / <a href=\"<<PROMPT(\"No\")>>\">No</a>"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "Yes",
+            "disabled": false,
+            "guid": "29845f71718b8e99ec3977cc6b7c0b52",
+            "options": {
+                "rules": [
+                    {
+                        "type": "field==value",
+                        "value": "Yes",
+                        "path": "<<email_action.prompt.status>>"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "No",
+            "disabled": false,
+            "guid": "43d21343085f38f2f190d380a5ee7736",
+            "options": {
+                "rules": [
+                    {
+                        "type": "field==value",
+                        "value": "No",
+                        "path": "<<email_action.prompt.status>>"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Additional Manager Action",
+            "disabled": false,
+            "guid": "5f44bb125c662ded09b954e3b8495f0c",
+            "options": {
+                "url": "http://www.example.com",
+                "content_type": "json",
+                "method": "post",
+                "payload": {
+                    "key": "value",
+                    "something": "the event contained <<somekey>>"
+                },
+                "headers": {},
+                "log_error_on_status": []
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "Trigger if No Response",
+            "disabled": false,
+            "guid": "38d7e6b2a9292a6706109015bb3621fb",
+            "options": {
+                "rules": [
+                    {
+                        "type": "!regex",
+                        "value": "^$",
+                        "path": "<<delay_escalation_for_5_minutes.delay>>"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "Trigger if Prompt Clicked Flow",
+            "disabled": false,
+            "guid": "421204d2f69249e269ee48045abacb74",
+            "options": {
+                "rules": [
+                    {
+                        "type": "!regex",
+                        "value": "^$",
+                        "path": "<<prompt_email.prompt>>"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::HTTPRequestAgent",
+            "name": "Escalate Ticket",
+            "disabled": false,
+            "guid": "1d4017a1436f6d349b7f342b37d7a501",
+            "options": {
+                "url": "http://www.example.com",
+                "content_type": "json",
+                "method": "post",
+                "payload": {
+                    "key": "value",
+                    "something": "the event contained <<somekey>>"
+                },
+                "headers": {},
+                "log_error_on_status": []
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Deduplicate Events",
+            "disabled": false,
+            "guid": "45984bb3b22ad008fadaf46552d74c25",
+            "options": {
+                "mode": "deduplicate",
+                "lookback": "100",
+                "path": "<<META.story_run.id>>"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EmailAgent",
+            "name": "Prompt Email",
+            "disabled": false,
+            "guid": "fac2c4dbce27178a78271499a1a3b70d",
+            "options": {
+                "recipients": [
+                    "twang@tines.io"
+                ],
+                "subject": "New Tines alert",
+                "body": "Click <a href=\"<<PROMPT(\"malicious\")>>\">here</a> if malicious"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Delay Escalation for 5 Minutes",
+            "disabled": false,
+            "guid": "260fc4e1c3eeaa7ed52cf4319847bae0",
+            "options": {
+                "mode": "delay",
+                "seconds": "15"
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "Trigger if Prompt Clicked",
+            "disabled": false,
+            "guid": "02b0cfe4c67b5ae9a708f02512459947",
+            "options": {
+                "rules": [
+                    {
+                        "type": "field==value",
+                        "value": "malicious",
+                        "path": "<<prompt_email.prompt.status>>"
+                    }
+                ]
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null
+        },
+        {
+            "type": "Agents::EventTransformationAgent",
+            "name": "Start Story",
+            "disabled": false,
+            "guid": "b28824b159c542879e6f4ded4a9b45c2",
+            "options": {
+                "mode": "message_only",
+                "loop": false,
+                "payload": {
+                    "message": "This is an automatically generated message from Tines"
+                }
+            },
+            "reporting": {
+                "time_saved_value": 0,
+                "time_saved_unit": "minutes"
+            },
+            "monitoring": {
+                "monitor_all_events": false,
+                "monitor_failures": false,
+                "monitor_no_events_emitted": null
+            },
+            "width": null,
+            "schedule": null
+        }
+    ],
+    "diagram_notes": [
+        {
+            "content": "Escalate No Response",
+            "position": [
+                555.0,
+                -45.0
+            ],
+            "guid": "2df8873b0b6c7470f220735825f4f251",
+            "width": null
+        },
+        {
+            "content": "Simple Yes/No prompt",
+            "position": [
+                15.0,
+                -45.0
+            ],
+            "guid": "b8f02a19a4cd07deb749bca6e2f729eb",
+            "width": null
+        }
+    ],
+    "links": [
+        {
+            "source": 0,
+            "receiver": 2
+        },
+        {
+            "source": 0,
+            "receiver": 1
+        },
+        {
+            "source": 4,
+            "receiver": 6
+        },
+        {
+            "source": 5,
+            "receiver": 3
+        },
+        {
+            "source": 7,
+            "receiver": 5
+        },
+        {
+            "source": 7,
+            "receiver": 4
+        },
+        {
+            "source": 8,
+            "receiver": 10
+        },
+        {
+            "source": 8,
+            "receiver": 9
+        },
+        {
+            "source": 9,
+            "receiver": 7
+        },
+        {
+            "source": 10,
+            "receiver": 7
+        },
+        {
+            "source": 11,
+            "receiver": 8
+        }
+    ],
+    "diagram_layout": "{\"071d2e71f337f83286636b5dc0bd2855\":[120,75],\"29845f71718b8e99ec3977cc6b7c0b52\":[240,180],\"43d21343085f38f2f190d380a5ee7736\":[0,180],\"5f44bb125c662ded09b954e3b8495f0c\":[855,630],\"38d7e6b2a9292a6706109015bb3621fb\":[540,540],\"421204d2f69249e269ee48045abacb74\":[855,540],\"1d4017a1436f6d349b7f342b37d7a501\":[540,630],\"45984bb3b22ad008fadaf46552d74c25\":[690,420],\"fac2c4dbce27178a78271499a1a3b70d\":[690,180],\"260fc4e1c3eeaa7ed52cf4319847bae0\":[540,300],\"02b0cfe4c67b5ae9a708f02512459947\":[840,300],\"b28824b159c542879e6f4ded4a9b45c2\":[690,75]}",
+    "send_to_story_enabled": false,
+    "entry_agent_guid": null,
+    "exit_agent_guids": [],
+    "exit_agent_guid": null,
+    "keep_events_for": 604800,
+    "reporting_status": true,
+    "send_to_story_access": null,
+    "send_to_stories": [],
+    "form": null,
+    "forms": []
+}
